@@ -1,0 +1,72 @@
+{
+    "name": "",
+    "mdns": {
+        "enabled": true,
+        "name": null // null, если тот же, что и name
+    },
+
+    "wifi": {
+        "mode": "sta", // ap, sta, ap_sta
+        "sta": {
+            "ap_list": [
+                {
+                    "ssid": "RSVPU",
+                    "password": ""
+                },
+                {
+                    "ssid": "RSVPU_corp",
+                    "password": "***"
+                }
+            ]
+        },
+        "ap": {
+            "ssid": "RSVPU_clock",
+            "password": ""
+        }
+    },
+
+    "time": {
+        "update_interval": 60000, // null, int
+        "ntp_server": "ntp1.stratum2.ru", // 192.168.222.17 RSVPU server
+        "offset": -1,
+        "daylight": true
+    },
+
+    "remote_server": {
+        "address": "",
+        "port": "",
+        "password": "",
+    },
+
+    "measures": {
+        "temp": {
+            "interval": 300,
+            "send_mode": "change", // null, change, always
+            "packet_size": 5
+        },
+        "humiduty": {
+            "interval": 300,
+            "send_mode": "change", // null, hange, always
+            "packet_size": 5
+        },
+        "pressure": {
+            "interval": 300,
+            "send_mode": "change", // null, change, always
+            "packet_size": 5
+        }
+    },
+
+    "api": {
+        "enabled": true,
+        "url": "/",
+        "auth_type": null, // null, basic, digest, custom
+        "login": "",
+        "password": ""
+    },
+
+    "logging": {
+        "mode": "full", // null, full, short
+        "send_interval": null, // null, int
+        "size": 1024
+    }
+}
