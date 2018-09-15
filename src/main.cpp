@@ -1,60 +1,7 @@
-#include <Arduino.h>
-
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <FS.h>
-
-#include <DHT.h>
-#include <Adafruit_BMP085.h>
-
-#include <TimeLib.h>
-#include <NtpClientLib.h>
-
-#include <ArduinoJson.h>
+#include "main.h"
 
 
-#define DATA_PIN D8
-#define CP_PIN D0
-#define DOTS_PIN D2
-
-#define DHTTYPE   DHT22
-#define DHTPIN    D4
-
-
-DHT dht(DHTPIN, DHTTYPE);
-Adafruit_BMP085 bmp;
-
-ESP8266WebServer server;
-
-
-void setup() {
-    dht.begin();
-
-    if (!bmp.begin())
-        Serial.println("BMP180 KO!");
-    else
-        Serial.println("BMP180 OK");
-
-    NTP.onNTPSyncEvent([](NTPSyncEvent_t error) {
-        if (error) {
-            Serial.print("Time Sync error: ");
-
-            if (error == noResponse)
-                Serial.println("NTP server not reachable");
-            else if (error == invalidAddress)
-                Serial.println("Invalid NTP server address");
-        } else {
-            Serial.print("Got NTP time: ");
-            Serial.println(NTP.getTimeDateString(NTP.getLastNTPSync()));
-        }
-    });
-
-    NTP.begin("ntp1.stratum2.ru", -1, true); //192.168.222.17 RSVPU server
-    NTP.setInterval(60000);
-
-
-    Serial.begin(115200);
-
+bool init_wifi(void) {
     // WiFi.begin (ssid, password);
     // int tentativeWiFi = 0;
 
@@ -69,16 +16,9 @@ void setup() {
     //     }
     // }
 
-//    Serial.println("");
-//    Serial.print("Connected to "); Serial.println ( ssid );
-//    Serial.print("IP address: "); Serial.println ( WiFi.localIP() );
-
-    if (!SPIFFS.begin()) {
-        Serial.println("SPIFFS Mount failed");
-    } else { 
-        Serial.println("SPIFFS Mount succesfull");
-        //loadHistory();
-    }
+    //    Serial.println("");
+    //    Serial.print("Connected to "); Serial.println ( ssid );
+    //    Serial.print("IP address: "); Serial.println ( WiFi.localIP() );
 
     // server.on("/tabmesures.json", sendTabMesures);
     // server.on("/mesures.json", sendMesures);
@@ -91,15 +31,80 @@ void setup() {
     // server.serveStatic("/", SPIFFS, "/index.html");
 
     server.begin();
-    Serial.println("HTTP server started");
+    Serial.println(F("HTTP server started"));
+    return true;
+}
 
-    Serial.print("Uptime :");
+bool init_time(void) {
+    if (settings.time.update_interval) {
+        NTP.onNTPSyncEvent([](NTPSyncEvent_t error) {
+            if (error) {
+                Serial.print(F("Time Sync error: "));
+
+                if (error == noResponse) {
+                    Serial.println(F("NTP server not reachable"));
+                } else if (error == invalidAddress) {
+                    Serial.println(F("Invalid NTP server address"));
+                }
+            } else {
+                Serial.print(F("Got NTP time: "));
+                Serial.println(NTP.getTimeDateString(NTP.getLastNTPSync()));
+            }
+        });
+
+        NTP.begin(settings.time.ntp_server, settings.time.offset, settings.time.daylight);
+        NTP.setInterval(settings.time.update_interval);
+    }
+
+    Serial.print(F("Uptime :"));
     Serial.println(NTP.getUptime());
-    Serial.print("LastBootTime :");
+    Serial.print(F("LastBootTime :"));
     Serial.println(NTP.getLastBootTime());
+    return true;
+}
+
+bool init_sensors(void) {
+    if (settings.measures.humiduty.interval || settings.measures.temperature.interval) {
+        dht.begin();
+    }
+
+    if (settings.measures.pressure.interval) {
+        // BMP180?
+        if (!bmp.begin()) {
+            Serial.println(F("BMP180 KO!"));
+            return false;
+        }
+    }
+
+    return true;
 }
 
 
-void loop() {
+void setup(void) {
+    Serial.begin(115200);
+
+    if (!SPIFFS.begin()) {
+        Serial.println(F("SPIFFS Mount failed"));
+    }
+
+    if (!parse_settings(&settings)) {
+        Serial.println(F("Settings file not parsed. used default"));
+    }
+    
+    if (!init_wifi()) {
+        Serial.println(F("wifi init failed"));
+    }
+
+    if (!init_time()) {
+        Serial.println(F("time init failed"));
+    }
+
+    if (!init_sensors()) {
+        Serial.println(F("sensors failed"));
+    }
+}
+
+
+void loop(void) {
     
 }

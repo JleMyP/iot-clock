@@ -1,13 +1,13 @@
 {
     "name": "",
-    "mdns": {
-        "enabled": true,
-        "name": null // null, если тот же, что и name
-    },
+    "mdns_enabled" : true,
+    "mdns_name": "", // "" если тот же, что и name
 
     "wifi": {
         "mode": "sta", // ap, sta, ap_sta
         "sta": {
+            "attempts": 5,
+            "attemtp_pause": 5,
             "ap_list": [
                 {
                     "ssid": "RSVPU",
@@ -34,39 +34,33 @@
 
     "remote_server": {
         "address": "",
-        "port": "",
+        "port": 80,
         "password": "",
     },
 
     "measures": {
         "temp": {
             "interval": 300,
-            "send_mode": "change", // null, change, always
+            "send_mode": 1, // off, change, always
             "packet_size": 5
         },
-        "humiduty": {
-            "interval": 300,
-            "send_mode": "change", // null, hange, always
-            "packet_size": 5
-        },
-        "pressure": {
-            "interval": 300,
-            "send_mode": "change", // null, change, always
-            "packet_size": 5
-        }
+        "humiduty": {},
+        "pressure": {}
     },
 
     "api": {
         "enabled": true,
         "url": "/",
-        "auth_type": null, // null, basic, digest, custom
+        "auth_type": 0, // off, basic, digest, custom
         "login": "",
         "password": ""
     },
 
     "logging": {
-        "mode": "full", // null, full, short
-        "send_interval": null, // null, int
-        "size": 1024
+        "mode": 0, // off, short, full
+        "location": 0, // serial, sys_flash, ext_flash, sd
+        "filename": "log",
+        "split_mode": 0, // day, size
+        "send_interval": 0
     }
 }
