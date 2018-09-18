@@ -7,17 +7,20 @@
 
 #include <IPAddress.h> // shit
 #include <ESP8266WiFiType.h>
+#include <FS.h>
+#include <ArduinoJson.h>
 
 
 
 struct ap_t {
-    String name;
+    String ssid;
     String password;
 };
 
 struct measure_t {
     uint32_t interval = 300;
     enum { OFF, CHANGED, ALWAYS } send_mode;
+    float delta = 1;
     uint32_t packet_size = 5;
 };
 
@@ -40,7 +43,7 @@ struct settings_t {
 
     struct {
         uint32_t update_interval = 60000;
-        String ntp_server;
+        String ntp_server = "ntp1.stratum2.ru";
         int32_t offset = -1;
         bool daylight = true;
     } time;
@@ -59,7 +62,8 @@ struct settings_t {
 
     struct {
         bool enabled = true;
-        enum { OFF, BASIC, DIGEST, CUSTOM } method;
+        String url = "/";
+        enum { OFF, BASIC, DIGEST, CUSTOM } auth_method;
         String login;
         String password;
     } api;
@@ -67,14 +71,18 @@ struct settings_t {
     struct {
         enum { OFF, SHORT, FULL } mode;
         enum { HSERIAL, SSERIAL, SYS_FLASH, EXT_FLASH, SD } location;
-        enum { DAY, SIZE } spit_mode;
+        enum { DAY, LINE } spit_mode;
+        uint32_t split_size = 5;
         String filename;
         uint32_t send_interval;
     } logging;
 };
 
-bool parse_settings(settings_t* settings);
-bool save_settings(settings_t* settings);
+String settings_serialize();
+bool settings_parse(String text, settings_t& dest);
+
+bool settings_read(void);
+bool settings_save(void);
 
 
 #endif // _SETTINGS_H_

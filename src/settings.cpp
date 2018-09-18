@@ -1,10 +1,137 @@
 #include "settings.h"
 
 
-bool parse_settings(settings_t* settings) {
+extern settings_t settings;
+extern String settings_filename;
+
+
+
+String settings_serialize() {
+    DynamicJsonBuffer buffer;
+    JsonObject& root = buffer.createObject();
+
+    root["name"] = settings.name;
+    root["mdns_enabled"] = settings.mdns_enabled;
+    root["mdns_name"] = settings.mdns_name;
+
+    JsonObject& wifi = root.createNestedObject("wifi");
+    wifi["mode"] = (int)settings.wifi.mode;
+
+    JsonObject& wifi_sta = wifi.createNestedObject("sta");
+    wifi_sta["attempts"] = settings.wifi.sta.attempts;
+    wifi_sta["attempt_pause"] = settings.wifi.sta.attempt_pause;
+
+    JsonArray& ap_list = wifi_sta.createNestedArray("ap_list");
+
+    for (auto s_ap : settings.wifi.sta.ap_list) {
+        JsonObject& ap = ap_list.createNestedObject();
+        ap["ssid"] = s_ap.ssid;
+        ap["password"] = s_ap.password;
+    }
+
+    JsonObject& ap = wifi.createNestedObject("ap");
+    ap["ssid"] = settings.wifi.ap.ssid;
+    ap["password"] = settings.wifi.ap.password;
+
+    JsonObject& time = root.createNestedObject("time");
+    time["update_interval"] = settings.time.update_interval;
+    time["ntp_server"] = settings.time.ntp_server;
+    time["offset"] = settings.time.offset;
+    time["daylight"] = settings.time.daylight;
+
+    JsonObject& remote_server = root.createNestedObject("remote_server");
+    remote_server["address"] = settings.remote_server.address;
+    remote_server["port"] = settings.remote_server.port;
+    remote_server["password"] = settings.remote_server.password;
+
+    JsonObject& measures = root.createNestedObject("measures");
+    JsonObject& temp_m = measures.createNestedObject("temperature");
+    temp_m["interval"] = settings.measures.temperature.interval;
+    temp_m["send_mode"] = (int)settings.measures.temperature.send_mode;
+    temp_m["delta"] = settings.measures.temperature.delta;
+    temp_m["packet_size"] = settings.measures.temperature.packet_size;
+    
+    JsonObject& humiduty_m = measures.createNestedObject("humiduty");
+    humiduty_m["interval"] = settings.measures.humiduty.interval;
+    humiduty_m["send_mode"] = (int)settings.measures.humiduty.send_mode;
+    humiduty_m["delta"] = settings.measures.humiduty.delta;
+    humiduty_m["packet_size"] = settings.measures.humiduty.packet_size;
+    
+    JsonObject& pressure_m = measures.createNestedObject("pressure");
+    pressure_m["interval"] = settings.measures.pressure.interval;
+    pressure_m["send_mode"] = (int)settings.measures.pressure.send_mode;
+    pressure_m["delta"] = settings.measures.pressure.delta;
+    pressure_m["packet_size"] = settings.measures.pressure.packet_size;
+
+    JsonObject& api = root.createNestedObject("api");
+    api["enabled"] = settings.api.enabled;
+    api["url"] = settings.api.url;
+    api["auth_method"] = (int)settings.api.auth_method;
+    api["login"] = settings.api.login;
+    api["password"] = settings.api.password;
+
+    JsonObject& logging = root.createNestedObject("logging");
+    logging["mode"] = (int)settings.logging.mode;
+    logging["location"] = (int)settings.logging.location;
+    logging["filename"] = settings.logging.location;
+    logging["split_mode"] = (int)settings.logging.spit_mode;
+    logging["split_size"] = settings.logging.split_size;
+    logging["send_interval"] = settings.logging.send_interval;
+
+    String out;
+    root.printTo(out);
+    return out;
+}
+
+bool settings_parse(String text, settings_t& dest) {
+    DynamicJsonBuffer buffer;
+    JsonObject& root = buffer.parseObject(text);
+
+    if (!root.success()) {
+        Serial.println(F("file parse failed"));
+        return false;
+    }
+
     return true;
 }
 
-bool save_settings(settings_t* settings) {
+
+bool settings_read(void) {
+    File f = SPIFFS.open(settings_filename, "r");
+
+    if (!f) {
+        f.close();
+        return false;
+    }
+
+    String content = f.readString();
+    f.close();
+
+    if (content.length() == 0) {
+        Serial.println("file is empty");
+        return false;
+    }
+
+    settings_t parsed;
+    if (!settings_parse(content, parsed)) {
+        Serial.println("parse error");
+        return false;
+    }
+
+
+
     return true;
+}
+
+bool settings_save(void) {
+    String serialized = settings_serialize();
+
+    File f = SPIFFS.open(settings_filename, "w");
+    if (f) {
+        f.print(serialized);
+        f.close();
+        return true;
+    }
+
+    return false;
 }

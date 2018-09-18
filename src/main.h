@@ -6,6 +6,7 @@
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#include <ESP8266HTTPUpdateServer.h>
 #include <FS.h>
 
 #include <DHT.h>
@@ -22,14 +23,26 @@
 #define DHTTYPE   DHT22
 #define DHTPIN    D4
 
+#define PRINT_DEBUG (msg, ...) ()
+
+
+struct measure_stat_t {
+    bool initialized;
+    bool error;
+    uint64_t last_measure;
+    float prevois_value;
+    float current_value;
+} temp_m, hum_m, press_m;
+
 
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
 
 settings_t settings;
-const String settings_filename = "";
+String settings_filename = "/settings.json";
 
 ESP8266WebServer server;
+ESP8266HTTPUpdateServer updateServer;
 
 
 bool init_wifi(void);

@@ -4,7 +4,7 @@
     "mdns_name": "", // "" если тот же, что и name
 
     "wifi": {
-        "mode": "sta", // ap, sta, ap_sta
+        "mode": 1, // off, sta, ap, ap_sta
         "sta": {
             "attempts": 5,
             "attemtp_pause": 5,
@@ -39,9 +39,10 @@
     },
 
     "measures": {
-        "temp": {
+        "temperature": {
             "interval": 300,
             "send_mode": 1, // off, change, always
+            "delta": 1,
             "packet_size": 5
         },
         "humiduty": {},
@@ -60,7 +61,8 @@
         "mode": 0, // off, short, full
         "location": 0, // serial, sys_flash, ext_flash, sd
         "filename": "log",
-        "split_mode": 0, // day, size
+        "split_mode": 0, // day, line
+        "split_size": 5,
         "send_interval": 0
     }
 }
