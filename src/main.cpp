@@ -74,21 +74,7 @@ bool init_wifi(void) {
 bool init_server(void) {
     updateServer.setup(&server);
 
-    server.on(settings.api.url + "settings/", []() {
-        String serialized = settings_serialize();
-        server.send(200, "application/json", serialized);
-    });
-
-    server.on(settings.api.url + "post_echo", HTTP_POST, []() {
-        Serial.println("request");
-        String response = "argc count: " + (String)server.args() + "\n";
-
-        for (int i = 0; i < server.args(); i++) {
-            response += server.argName(i) + " = " + server.arg(i) + "\n";
-        }
-
-        server.send(200, "text/plain", response);
-    });
+    init_api();
 
     server.begin(80);
     Serial.println(F("HTTP server started"));
@@ -170,10 +156,10 @@ void setup(void) {
         Serial.println(F("SPIFFS Mount failed"));
     }
 
-    // Serial.println(F("read..."));
-    // if (!read_settings()) {
-    //     Serial.println(F("Settings file not parsed. used default"));
-    // }
+    Serial.println(F("read..."));
+    if (!settings_read()) {
+        Serial.println(F("Settings file not parsed. used default"));
+    }
 
     Serial.println(F("wifi init..."));
     if (!init_wifi()) {

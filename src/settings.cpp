@@ -92,6 +92,22 @@ bool settings_parse(String text, settings_t& dest) {
         return false;
     }
 
+    dest.name = root["name"].as<char*>();
+    dest.mdns_enabled = root["mdns_enabled"].as<bool>();
+    dest.mdns_name = root["mdns_name"].as<char*>();
+
+    dest.wifi.mode = (WiFiMode)root["wifi"]["mode"].as<uint8_t>();
+    dest.wifi.ap.ssid = root["wifi"]["ap"]["ssid"].as<char*>();
+    dest.wifi.ap.password = root["wifi"]["ap"]["password"].as<char*>();
+
+    dest.wifi.sta.ap_list.clear();
+    // root.prettyPrintTo(Serial);
+
+    for (auto elem : root["wifi"]["sta"]["ap_list"].as<JsonArray>()) {
+        ap_t ap { .ssid = elem["ssid"].as<char*>(), .password = elem["password"].as<char*>() };
+        dest.wifi.sta.ap_list.push_back(ap);
+    }
+
     return true;
 }
 
@@ -118,8 +134,7 @@ bool settings_read(void) {
         return false;
     }
 
-
-
+    settings = parsed;
     return true;
 }
 
