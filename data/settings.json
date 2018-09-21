@@ -1,10 +1,10 @@
 {
     "name": "",
     "mdns_enabled" : true,
-    "mdns_name": "", // "" если тот же, что и name
+    "mdns_name": "",
 
     "wifi": {
-        "mode": 1, // off, sta, ap, ap_sta
+        "mode": 1,
         "sta": {
             "attempts": 5,
             "attemtp_pause": 5,
@@ -26,8 +26,8 @@
     },
 
     "time": {
-        "update_interval": 60000, // null, int
-        "ntp_server": "ntp1.stratum2.ru", // 192.168.222.17 RSVPU server
+        "update_interval": 60000,
+        "ntp_server": "ntp1.stratum2.ru",
         "offset": -1,
         "daylight": true
     },
@@ -41,7 +41,7 @@
     "measures": {
         "temperature": {
             "interval": 300,
-            "send_mode": 1, // off, change, always
+            "send_mode": 1,
             "delta": 1,
             "packet_size": 5
         },
@@ -52,16 +52,16 @@
     "api": {
         "enabled": true,
         "url": "/",
-        "auth_type": 0, // off, basic, digest, custom
+        "auth_type": 0,
         "login": "",
         "password": ""
     },
 
     "logging": {
-        "mode": 0, // off, short, full
-        "location": 0, // serial, sys_flash, ext_flash, sd
+        "mode": 0,
+        "location": 0,
         "filename": "log",
-        "split_mode": 0, // day, line
+        "split_mode": 0,
         "split_size": 5,
         "send_interval": 0
     }
