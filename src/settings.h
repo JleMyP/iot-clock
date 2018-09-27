@@ -78,7 +78,7 @@ struct settings_t {
     } logging;
 };
 
-String settings_serialize();
+String settings_serialize(void);
 bool settings_parse(String text, settings_t& dest);
 
 bool settings_read(void);

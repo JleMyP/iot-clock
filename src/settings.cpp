@@ -6,7 +6,7 @@ extern String settings_filename;
 
 
 
-String settings_serialize() {
+String settings_serialize(void) {
     DynamicJsonBuffer buffer;
     JsonObject& root = buffer.createObject();
 

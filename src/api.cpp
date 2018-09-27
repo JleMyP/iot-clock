@@ -6,13 +6,13 @@ extern settings_t settings;
 
 
 void init_api(void) {
-    server.on(settings.api.url + "system", HTTP_GET, api_system_get);
-    server.on(settings.api.url + "system/restart", HTTP_GET, api_system_restart_get);
+    server.on(settings.api.url + "system", HTTP_GET, api_system);
+    server.on(settings.api.url + "system/restart", HTTP_GET, api_system);
 
     server.on(settings.api.url + "settings", HTTP_GET, api_settings_get);
     server.on(settings.api.url + "settings", HTTP_POST, api_settings_post);
 
-    server.on(settings.api.url + "settings/reset", HTTP_GET, api_settings_reset_get);
+    server.on(settings.api.url + "settings/reset", HTTP_GET, api_settings_reset);
 
     server.on(settings.api.url + "settings/wifi", HTTP_GET, api_settings_wifi_get);
     server.on(settings.api.url + "settings/wifi", HTTP_POST, api_settings_wifi_post);
@@ -26,7 +26,7 @@ void init_api(void) {
 }
 
 
-void api_system_get(void) {
+void api_system(void) {
     DynamicJsonBuffer buffer;
     JsonObject& root = buffer.createObject();
     root["free_heap"] = ESP.getFreeHeap();
@@ -50,7 +50,8 @@ void api_system_get(void) {
     server.send(200, "application/json", response);
 }
 
-void api_system_restart_get(void) {
+void api_system_restart(void) {
+    server.send(200);
     ESP.restart();
 }
 
@@ -76,14 +77,14 @@ void api_settings_post(void) {
     }
 }
 
-void api_settings_reset_get(void) {
+void api_settings_reset(void) {
     settings_t new_settings;
     settings = new_settings;
     settings_save();
 }
 
 void api_settings_wifi_get(void) {
-
+    // TODO: замутить отдачу блока
 }
 
 void api_settings_wifi_post(void) {
@@ -141,7 +142,7 @@ void api_time_get(void) {
 
 
 void api_time_post(void) {
-
+    // TODO: реализовать настройку времени
 }
 
 void api_post_echo(void) {
