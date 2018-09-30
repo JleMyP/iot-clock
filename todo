@@ -1,0 +1,26 @@
+SCADA
+
+WiFi Mesh
+    https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFiMesh
+    https://github.com/gmag11/painlessMesh
+
+WiFi managment
+    https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266WiFi/examples/WiFiMulti/WiFiMulti.ino
+    че-то там со стандартным хранением настроек во флеш в спец разделе и их восстановление при перезагрузке
+
+вермя
+    работа с внешними часами и без них
+    ? работа с будильниками
+
+место хранение логов
+    внутренняя flash
+    внешняя flash
+    sd карта
+
+звук
+    ? место хранения музыки
+    воспроизведение
+        есть усилок pam8403
+        и i2s усилок pam8302a
+
+
