@@ -5,9 +5,9 @@ extern ESP8266WebServer server;
 extern settings_t settings;
 
 
-void init_api(void) {
+void init_api() {
     server.on(settings.api.url + "system", HTTP_GET, api_system);
-    server.on(settings.api.url + "system/restart", HTTP_GET, api_system);
+    server.on(settings.api.url + "system/restart", HTTP_GET, api_system_restart);
 
     server.on(settings.api.url + "settings", HTTP_GET, api_settings_get);
     server.on(settings.api.url + "settings", HTTP_POST, api_settings_post);
@@ -26,7 +26,7 @@ void init_api(void) {
 }
 
 
-void api_system(void) {
+void api_system() {
     DynamicJsonBuffer buffer;
     JsonObject& root = buffer.createObject();
     root["free_heap"] = ESP.getFreeHeap();
@@ -50,7 +50,7 @@ void api_system(void) {
     server.send(200, "application/json", response);
 }
 
-void api_system_restart(void) {
+void api_system_restart() {
     server.send(200);
     ESP.restart();
 }
@@ -58,17 +58,18 @@ void api_system_restart(void) {
 
 #pragma region settings
 
-void api_settings_get(void) {
+void api_settings_get() {
     String serialized = settings_serialize();
     server.send(200, "application/json", serialized);
 }
 
-void api_settings_post(void) {
+void api_settings_post() {
     settings_t new_settings;
 
     if (server.hasArg("plain")) {
         if (settings_parse(server.arg("plain"), new_settings)) {
             settings = new_settings;
+            server.send(200);
         } else {
             server.send(400, "text/plain", "incorect data");
         }
@@ -77,17 +78,18 @@ void api_settings_post(void) {
     }
 }
 
-void api_settings_reset(void) {
+void api_settings_reset() {
     settings_t new_settings;
     settings = new_settings;
     settings_save();
 }
 
-void api_settings_wifi_get(void) {
+void api_settings_wifi_get() {
     // TODO: замутить отдачу блока
+    server.send(200);
 }
 
-void api_settings_wifi_post(void) {
+void api_settings_wifi_post() {
     WiFiMode mode = settings.wifi.mode;
 
     if (server.hasArg("mode")) {
@@ -109,7 +111,7 @@ void api_settings_wifi_post(void) {
     }
 }
 
-void api_settings_wifi_sta_ap_list_post(void) {
+void api_settings_wifi_sta_ap_list_post() {
     if (server.hasArg("ssid") && server.hasArg("password")) {
         ap_t new_ap { .ssid = server.arg("ssid"), .password = server.arg("password") };
         bool found = false;
@@ -135,17 +137,18 @@ void api_settings_wifi_sta_ap_list_post(void) {
 #pragma endregion
 
 
-void api_time_get(void) {
+void api_time_get() {
     String response = "{ \"time\": \"" + NTP.getTimeDateString() + "\" }";
     server.send(200, "application/json", response);
 }
 
 
-void api_time_post(void) {
+void api_time_post() {
     // TODO: реализовать настройку времени
+    server.send(200, "text/plain", "not realized");
 }
 
-void api_post_echo(void) {
+void api_post_echo() {
     Serial.println("request");
     String response = "argc count: " + (String)server.args() + "\n";
 

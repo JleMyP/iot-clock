@@ -6,7 +6,7 @@ extern String settings_filename;
 
 
 
-String settings_serialize(void) {
+String settings_serialize() {
     DynamicJsonBuffer buffer;
     JsonObject& root = buffer.createObject();
 
@@ -101,18 +101,34 @@ bool settings_parse(String text, settings_t& dest) {
     dest.wifi.ap.password = root["wifi"]["ap"]["password"].as<char*>();
 
     dest.wifi.sta.ap_list.clear();
-    // root.prettyPrintTo(Serial);
 
     for (auto elem : root["wifi"]["sta"]["ap_list"].as<JsonArray>()) {
         ap_t ap { .ssid = elem["ssid"].as<char*>(), .password = elem["password"].as<char*>() };
         dest.wifi.sta.ap_list.push_back(ap);
     }
 
+    dest.time.ntp_server = root["time"]["ntp_server"].as<char*>();
+    dest.time.offset = root["time"]["offset"].as<uint8_t>();
+    dest.time.update_interval = root["time"]["update_interval"].as<uint32_t>();
+    dest.time.daylight = root["time"]["daylight"].as<bool>();
+
+    settings_read_measure(settings.measures.temperature, root["measures"]["temperature"]);
+    settings_read_measure(settings.measures.temperature, root["measures"]["temperature"]);
+    settings_read_measure(settings.measures.temperature, root["measures"]["temperature"]);
+
     return true;
 }
 
 
-bool settings_read(void) {
+void settings_read_measure(measure_t& measure, JsonObject& obj) {
+    measure.interval = obj["interval"].as<uint32_t>();
+    measure.send_mode = (measure_t::send_mode_t)obj["send_mode"].as<uint8_t>();
+    measure.delta = obj["delta"].as<float>();
+    measure.packet_size = obj["packet_size"].as<uint32_t>();
+}
+
+
+bool settings_read() {
     File f = SPIFFS.open(settings_filename, "r");
 
     if (!f) {
@@ -138,7 +154,7 @@ bool settings_read(void) {
     return true;
 }
 
-bool settings_save(void) {
+bool settings_save() {
     String serialized = settings_serialize();
 
     File f = SPIFFS.open(settings_filename, "w");

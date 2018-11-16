@@ -24,7 +24,11 @@
 #define DHTTYPE   DHT22
 #define DHTPIN    D4
 
-#define PRINT_DEBUG (msg, ...) ()
+#ifndef DEBUG
+    #define PRINT_DEBUG (msg, ...) ()
+#else
+    #define PRINT_DEBUG (msg, ...) Serial.println(msg)
+#endif
 
 
 struct measure_stat_t {
@@ -45,12 +49,19 @@ String settings_filename = "/settings.json";
 ESP8266WebServer server;
 ESP8266HTTPUpdateServer updateServer;
 
+typedef float (*measire_getter_t)();
 
-bool init_wifi(void);
-bool init_time(void);
-bool init_sensors(void);
 
-void setup(void);
-void loop(void);
+bool init_wifi();
+bool init_time();
+bool init_sensors();
+void get_measure(uint32_t ms, measure_stat_t& stat, measure_t& conf, measire_getter_t get);
+
+void setup();
+void loop();
+
+float get_temperature();
+float get_humidity();
+float get_pressure();
 
 #endif // _MAIN_H_

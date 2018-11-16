@@ -1,21 +1,17 @@
 {
     "name": "",
     "mdns_enabled" : true,
-    "mdns_name": "",
+    "mdns_name": "clock_1",
 
     "wifi": {
-        "mode": 1,
+        "mode": 3,
         "sta": {
-            "attempts": 5,
-            "attemtp_pause": 5,
+            "attempts": 2,
+            "attemtp_pause": 2,
             "ap_list": [
                 {
                     "ssid": "RSVPU",
                     "password": ""
-                },
-                {
-                    "ssid": "RSVPU_corp",
-                    "password": "***"
                 }
             ]
         },
@@ -26,16 +22,16 @@
     },
 
     "time": {
-        "update_interval": 60000,
+        "update_interval": 600,
         "ntp_server": "ntp1.stratum2.ru",
-        "offset": -1,
+        "offset": 5,
         "daylight": true
     },
 
     "remote_server": {
         "address": "",
         "port": 80,
-        "password": "",
+        "password": ""
     },
 
     "measures": {
@@ -45,12 +41,23 @@
             "delta": 1,
             "packet_size": 5
         },
-        "humiduty": {},
-        "pressure": {}
+        "humiduty": {
+            "interval": 0,
+            "send_mode": 1,
+            "delta": 1,
+            "packet_size": 5
+        },
+        "pressure": {
+            "interval": 0,
+            "send_mode": 1,
+            "delta": 1,
+            "packet_size": 5
+        }
     },
 
     "api": {
         "enabled": true,
+        "port": 80,
         "url": "/",
         "auth_type": 0,
         "login": "",

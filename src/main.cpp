@@ -1,7 +1,7 @@
 #include "main.h"
 
 
-bool init_wifi(void) {
+bool init_wifi() {
     if (settings.wifi.mode == WIFI_AP || settings.wifi.mode == WIFI_AP_STA) {
         WiFi.mode(settings.wifi.mode);
         
@@ -20,6 +20,7 @@ bool init_wifi(void) {
                 wl_status_t status = WiFi.begin(ap.ssid.c_str(), ap.password.c_str());
 
                 if (WiFi.waitForConnectResult() == WL_CONNECTED) {
+                    Serial.println(ap.ssid);
                     break;
                 }
 
@@ -71,17 +72,17 @@ bool init_wifi(void) {
     // return true;
 }
 
-bool init_server(void) {
+bool init_server() {
     updateServer.setup(&server);
 
     init_api();
 
-    server.begin(80);
+    server.begin(settings.api.port);
     Serial.println(F("HTTP server started"));
     return true;
 }
 
-bool init_time(void) {
+bool init_time() {
     if (settings.time.update_interval) {
         NTP.onNTPSyncEvent([](NTPSyncEvent_t error) {
             if (error) {
@@ -107,7 +108,7 @@ bool init_time(void) {
     return true;
 }
 
-bool init_sensors(void) {
+bool init_sensors() {
     if (settings.measures.humiduty.interval || settings.measures.temperature.interval) {
         dht.begin();
         temp_m.initialized = true;
@@ -117,7 +118,6 @@ bool init_sensors(void) {
     if (settings.measures.pressure.interval) {
         press_m.initialized = bmp.begin();
 
-        // BMP180?
         if (!press_m.initialized) {
             Serial.println(F("BMP180 KO!"));
             return false;
@@ -128,7 +128,7 @@ bool init_sensors(void) {
 }
 
 
-void getMeasure(unsigned int ms, measure_stat_t& stat, measure_t& conf, float get(void)) {
+void get_measure(uint32_t ms, measure_stat_t& stat, measure_t& conf, measire_getter_t get) {
     if (conf.interval && stat.initialized && (conf.interval < ms - stat.last_measure || ms < stat.last_measure)) {
         float _value = get();
 
@@ -148,7 +148,7 @@ void getMeasure(unsigned int ms, measure_stat_t& stat, measure_t& conf, float ge
 }
 
 
-void setup(void) {
+void setup() {
     Serial.begin(115200);
 
     Serial.println(F("spifs init..."));
@@ -191,9 +191,23 @@ void loop() {
     unsigned long ms = millis();
 
     if (ms % 10000 == 0) {
-        getMeasure(ms, temp_m, settings.measures.temperature, [](void) { return dht.readTemperature(); });
-        getMeasure(ms, hum_m, settings.measures.humiduty, [](void) { return dht.readHumidity(); });
-        getMeasure(ms, press_m, settings.measures.pressure, [](void) { return bmp.readPressure() / 10000.0F * 75; });
+        get_measure(ms, temp_m, settings.measures.temperature, get_temperature);
+        get_measure(ms, hum_m, settings.measures.humiduty, get_humidity);
+        get_measure(ms, press_m, settings.measures.pressure, get_pressure);
         Serial.println(NTP.getTimeStr());
+        Serial.flush();
     }
+}
+
+
+float get_temperature() {
+    return dht.readTemperature();
+}
+
+float get_humidity() {
+    return dht.readHumidity();
+}
+
+float get_pressure() {
+    return bmp.readPressure() / 10000.0F * 75;
 }
