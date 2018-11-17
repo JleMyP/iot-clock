@@ -88,7 +88,7 @@ bool settings_parse(String text, settings_t& dest) {
     JsonObject& root = buffer.parseObject(text);
 
     if (!root.success()) {
-        Serial.println(F("file parse failed"));
+        _DEBUG_PRINTLN(F("file parse failed"));
         return false;
     }
 
@@ -140,13 +140,13 @@ bool settings_read() {
     f.close();
 
     if (content.length() == 0) {
-        Serial.println("file is empty");
+        _DEBUG_PRINTLN(F("file is empty"));
         return false;
     }
 
     settings_t parsed;
     if (!settings_parse(content, parsed)) {
-        Serial.println("parse error");
+        _DEBUG_PRINTLN(F("parse error"));
         return false;
     }
 

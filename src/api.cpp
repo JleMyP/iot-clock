@@ -27,6 +27,8 @@ void init_api() {
 
 
 void api_system() {
+    _DEBUG_PRINT(F("handling GET api/system..."));
+
     DynamicJsonBuffer buffer;
     JsonObject& root = buffer.createObject();
     root["free_heap"] = ESP.getFreeHeap();
@@ -48,9 +50,13 @@ void api_system() {
     String response;
     root.printTo(response);
     server.send(200, "application/json", response);
+
+    _DEBUG_PRINTLN(F("ok"));
 }
 
 void api_system_restart() {
+    _DEBUG_PRINT(F("handling GET api/system/restart..."));
+
     server.send(200);
     ESP.restart();
 }
@@ -59,11 +65,17 @@ void api_system_restart() {
 #pragma region settings
 
 void api_settings_get() {
+    _DEBUG_PRINT(F("handling GET api/settings..."));
+
     String serialized = settings_serialize();
     server.send(200, "application/json", serialized);
+
+    _DEBUG_PRINTLN(F("ok"));
 }
 
 void api_settings_post() {
+    _DEBUG_PRINT(F("handling POST api/settings..."));
+
     settings_t new_settings;
 
     if (server.hasArg("plain")) {
@@ -76,20 +88,33 @@ void api_settings_post() {
     } else {
         server.send(400, "text/plain", "no valid keys");
     }
+
+    _DEBUG_PRINTLN(F("ok"));
 }
 
 void api_settings_reset() {
+    _DEBUG_PRINT(F("handling GET api/settings/reset..."));
+
     settings_t new_settings;
     settings = new_settings;
     settings_save();
+    server.send(200);
+
+    _DEBUG_PRINTLN(F("ok"));
 }
 
 void api_settings_wifi_get() {
+    _DEBUG_PRINT(F("handling GET api/settings/wifi..."));
+
     // TODO: замутить отдачу блока
     server.send(200);
+
+    _DEBUG_PRINT(F("ok"));
 }
 
 void api_settings_wifi_post() {
+    _DEBUG_PRINT(F("handling POST api/settings/wifi/sta/ap_list..."));
+
     WiFiMode mode = settings.wifi.mode;
 
     if (server.hasArg("mode")) {
@@ -109,9 +134,13 @@ void api_settings_wifi_post() {
             server.send(400, "text/plain", "incorrect mode");
         }
     }
+
+    _DEBUG_PRINTLN(F("ok"));
 }
 
 void api_settings_wifi_sta_ap_list_post() {
+    _DEBUG_PRINT(F("handling POST api/settings..."));
+
     if (server.hasArg("ssid") && server.hasArg("password")) {
         ap_t new_ap { .ssid = server.arg("ssid"), .password = server.arg("password") };
         bool found = false;
@@ -132,24 +161,34 @@ void api_settings_wifi_sta_ap_list_post() {
     } else {
         server.send(400, "text/plain", "incorrect input data");
     }
+
+    _DEBUG_PRINTLN(F("ok"));
 }
 
 #pragma endregion
 
 
 void api_time_get() {
+    _DEBUG_PRINT(F("handling GET api/time..."));
+
     String response = "{ \"time\": \"" + NTP.getTimeDateString() + "\" }";
     server.send(200, "application/json", response);
+
+    _DEBUG_PRINTLN(F("ok"));
 }
 
 
 void api_time_post() {
+    _DEBUG_PRINT(F("handling POST api/time..."));
     // TODO: реализовать настройку времени
     server.send(200, "text/plain", "not realized");
+
+    _DEBUG_PRINTLN(F("ok"));
 }
 
 void api_post_echo() {
-    Serial.println("request");
+    _DEBUG_PRINT(F("handling POST api/post_echo..."));
+
     String response = "argc count: " + (String)server.args() + "\n";
 
     for (int i = 0; i < server.args(); i++) {
@@ -157,4 +196,6 @@ void api_post_echo() {
     }
 
     server.send(200, "text/plain", response);
+
+    _DEBUG_PRINTLN(F("ok"));
 }

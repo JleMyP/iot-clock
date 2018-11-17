@@ -6,7 +6,7 @@ bool init_wifi() {
         WiFi.mode(settings.wifi.mode);
         
         if (!WiFi.softAP(settings.wifi.ap.ssid.c_str(), settings.wifi.ap.password.c_str(), 1, 0, 1)) {
-            Serial.println(F("starting ap failed"));
+            _DEBUG_PRINTLN(F("starting ap failed"));
         }
     } 
     
@@ -20,7 +20,8 @@ bool init_wifi() {
                 wl_status_t status = WiFi.begin(ap.ssid.c_str(), ap.password.c_str());
 
                 if (WiFi.waitForConnectResult() == WL_CONNECTED) {
-                    Serial.println(ap.ssid);
+                    _DEBUG_PRINTLN(ap.ssid);
+                    _DEBUG_PRINTLN(WiFi.localIP().toString());
                     break;
                 }
 
@@ -33,7 +34,7 @@ bool init_wifi() {
         }
 
         if (WiFi.status() != WL_CONNECTED) {
-            Serial.println(F("sta not connected"));
+            _DEBUG_PRINTLN(F("sta not connected"));
         }
     }
 
@@ -78,7 +79,7 @@ bool init_server() {
     init_api();
 
     server.begin(settings.api.port);
-    Serial.println(F("HTTP server started"));
+    _DEBUG_PRINTLN(F("HTTP server started"));
     return true;
 }
 
@@ -86,16 +87,16 @@ bool init_time() {
     if (settings.time.update_interval) {
         NTP.onNTPSyncEvent([](NTPSyncEvent_t error) {
             if (error) {
-                Serial.print(F("Time Sync error: "));
+                _DEBUG_PRINTLN(F("Time Sync error: "));
 
                 if (error == noResponse) {
-                    Serial.println(F("NTP server not reachable"));
+                    _DEBUG_PRINTLN(F("NTP server not reachable"));
                 } else if (error == invalidAddress) {
-                    Serial.println(F("Invalid NTP server address"));
+                    _DEBUG_PRINTLN(F("Invalid NTP server address"));
                 }
             } else {
-                Serial.print(F("Got NTP time: "));
-                Serial.println(NTP.getTimeDateString(NTP.getLastNTPSync()));
+                _DEBUG_PRINT(F("Got NTP time: "));
+                _DEBUG_PRINTLN(NTP.getTimeDateString(NTP.getLastNTPSync()));
             }
         });
 
@@ -103,8 +104,8 @@ bool init_time() {
         NTP.setInterval(settings.time.update_interval);
     }
 
-    Serial.printf("Uptime : \n");//, NTP.getUptime());
-    Serial.printf("LastBootTime : \n");//, NTP.getLastBootTime());
+    _DEBUG_PRINTLN("Uptime : \n");//, NTP.getUptime());
+    _DEBUG_PRINTLN("LastBootTime : \n");//, NTP.getLastBootTime());
     return true;
 }
 
@@ -119,7 +120,7 @@ bool init_sensors() {
         press_m.initialized = bmp.begin();
 
         if (!press_m.initialized) {
-            Serial.println(F("BMP180 KO!"));
+            _DEBUG_PRINTLN(F("BMP180 KO!"));
             return false;
         }
     }
@@ -151,34 +152,46 @@ void get_measure(uint32_t ms, measure_stat_t& stat, measure_t& conf, measire_get
 void setup() {
     Serial.begin(115200);
 
-    Serial.println(F("spifs init..."));
+    _DEBUG_PRINTLN(F("spifs init..."));
     if (!SPIFFS.begin()) {
-        Serial.println(F("SPIFFS Mount failed"));
+        _DEBUG_PRINTLN(F("SPIFFS Mount failed"));
     }
 
-    Serial.println(F("read..."));
+    _DEBUG_PRINTLN(F("read..."));
     if (!settings_read()) {
-        Serial.println(F("Settings file not parsed. used default"));
+        _DEBUG_PRINTLN(F("Settings file not parsed. used default"));
     }
 
-    Serial.println(F("wifi init..."));
+    _DEBUG_PRINTLN(F("wifi init..."));
     if (!init_wifi()) {
-        Serial.println(F("wifi init failed"));
+        _DEBUG_PRINTLN(F("wifi init failed"));
     }
 
-    Serial.println(F("time init..."));
+    _DEBUG_PRINTLN(F("time init..."));
     if (!init_time()) {
-        Serial.println(F("time init failed"));
+        _DEBUG_PRINTLN(F("time init failed"));
     }
 
-    Serial.println(F("sensors init..."));
+    _DEBUG_PRINTLN(F("sensors init..."));
     if (!init_sensors()) {
-        Serial.println(F("sensors failed"));
+        _DEBUG_PRINTLN(F("sensors failed"));
     }
 
-    Serial.println(F("server init..."));
+    _DEBUG_PRINTLN(F("server init..."));
     if (!init_server()) {
-        Serial.println(F("server not started"));
+        _DEBUG_PRINTLN(F("server not started"));
+    }
+
+    
+    if (settings.mdns_enabled) {
+        _DEBUG_PRINTLN(F("mdns init..."));
+
+        if (!MDNS.begin(settings.mdns_name.c_str())) {
+            _DEBUG_PRINTLN(F("HTTP server started"));
+        } else {
+            _DEBUG_PRINTLN(settings.mdns_name.c_str());
+            MDNS.addService("http", "tcp", settings.api.port);
+        }
     }
 
     Serial.flush();
@@ -194,7 +207,7 @@ void loop() {
         get_measure(ms, temp_m, settings.measures.temperature, get_temperature);
         get_measure(ms, hum_m, settings.measures.humiduty, get_humidity);
         get_measure(ms, press_m, settings.measures.pressure, get_pressure);
-        Serial.println(NTP.getTimeStr());
+        _DEBUG_PRINTLN(NTP.getTimeStr());
         Serial.flush();
     }
 }

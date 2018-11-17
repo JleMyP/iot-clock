@@ -6,6 +6,7 @@
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
 #include <FS.h>
 
@@ -21,22 +22,13 @@
 #include "display.h"
 #include "api.h"
 
-#define DHTTYPE   DHT22
-#define DHTPIN    D4
-
-#ifndef DEBUG
-    #define PRINT_DEBUG (msg, ...) ()
-#else
-    #define PRINT_DEBUG (msg, ...) Serial.println(msg)
-#endif
-
 
 struct measure_stat_t {
-    bool initialized;
-    bool error;
     uint64_t last_measure;
     float prevois_value;
     float current_value;
+    bool initialized;
+    bool error;
 } temp_m, hum_m, press_m;
 
 
