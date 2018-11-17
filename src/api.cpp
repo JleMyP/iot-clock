@@ -62,8 +62,6 @@ void api_system_restart() {
 }
 
 
-#pragma region settings
-
 void api_settings_get() {
     _DEBUG_PRINT(F("handling GET api/settings..."));
 
@@ -107,7 +105,7 @@ void api_settings_wifi_get() {
     _DEBUG_PRINT(F("handling GET api/settings/wifi..."));
 
     // TODO: замутить отдачу блока
-    server.send(200);
+    server.send(500);
 
     _DEBUG_PRINT(F("ok"));
 }
@@ -121,10 +119,10 @@ void api_settings_wifi_post() {
         String s_mode = server.arg("mode");
 
         if (s_mode.length() == 1 && s_mode[0] >= '0' && s_mode[0] <= '3') {
-            mode = (WiFiMode)s_mode[0];
+            mode = (WiFiMode)(s_mode[0] - '0');
 
             if (mode == WIFI_STA && settings.wifi.sta.ap_list.size() == 0) {
-                server.send(400, "text/plain", "can't ser mode STA: sta.ap_list is empty");
+                server.send(400, "text/plain", "can't set mode STA: sta.ap_list is empty");
             } else {
                 settings.wifi.mode = mode;
                 settings_save();
@@ -165,8 +163,6 @@ void api_settings_wifi_sta_ap_list_post() {
     _DEBUG_PRINTLN(F("ok"));
 }
 
-#pragma endregion
-
 
 void api_time_get() {
     _DEBUG_PRINT(F("handling GET api/time..."));
@@ -177,14 +173,16 @@ void api_time_get() {
     _DEBUG_PRINTLN(F("ok"));
 }
 
-
 void api_time_post() {
     _DEBUG_PRINT(F("handling POST api/time..."));
-    // TODO: реализовать настройку времени
-    server.send(200, "text/plain", "not realized");
+
+    setTime(server.arg("hour").toInt(), server.arg("minute").toInt(), server.arg("second").toInt(),
+        server.arg("day").toInt(), server.arg("month").toInt(), server.arg("year").toInt());
+    server.send(200);
 
     _DEBUG_PRINTLN(F("ok"));
 }
+
 
 void api_post_echo() {
     _DEBUG_PRINT(F("handling POST api/post_echo..."));

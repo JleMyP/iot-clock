@@ -8,8 +8,8 @@ bool init_wifi() {
         if (!WiFi.softAP(settings.wifi.ap.ssid.c_str(), settings.wifi.ap.password.c_str(), 1, 0, 1)) {
             _DEBUG_PRINTLN(F("starting ap failed"));
         }
-    } 
-    
+    }
+
     if (settings.wifi.mode == WIFI_STA || settings.wifi.mode == WIFI_AP_STA) {
         if (WiFi.getMode() != settings.wifi.mode) {
             WiFi.mode(settings.wifi.mode);
@@ -17,11 +17,11 @@ bool init_wifi() {
 
         for (ap_t ap : settings.wifi.sta.ap_list) {
             for (uint8_t i = 0; i < settings.wifi.sta.attempts; i++) {
-                wl_status_t status = WiFi.begin(ap.ssid.c_str(), ap.password.c_str());
+                WiFi.begin(ap.ssid.c_str(), ap.password.c_str());
 
                 if (WiFi.waitForConnectResult() == WL_CONNECTED) {
                     _DEBUG_PRINTLN(ap.ssid);
-                    _DEBUG_PRINTLN(WiFi.localIP().toString());
+                    _DEBUG_PRINTLN(WiFi.localIP());
                     break;
                 }
 
@@ -39,38 +39,6 @@ bool init_wifi() {
     }
 
     return true;
-
-    // WiFi.begin (ssid, password);
-    // int tentativeWiFi = 0;
-
-    // while (WiFi.status() != WL_CONNECTED) {
-    //     delay (500);
-    //     Serial.print ( "." );
-    //     tentativeWiFi++;
-
-    //     if ( tentativeWiFi > 20 ) {
-    //         ESP.reset();
-    //         while(true) delay(1);
-    //     }
-    // }
-
-    //    Serial.println("");
-    //    Serial.print("Connected to "); Serial.println ( ssid );
-    //    Serial.print("IP address: "); Serial.println ( WiFi.localIP() );
-
-    // server.on("/tabmesures.json", sendTabMesures);
-    // server.on("/mesures.json", sendMesures);
-    // server.on("/gpio", updateGpio);
-    // server.on("/graph_temp.json", sendHistory);
-
-    // server.serveStatic("/js", SPIFFS, "/js");
-    // server.serveStatic("/css", SPIFFS, "/css");
-    // server.serveStatic("/img", SPIFFS, "/img");
-    // server.serveStatic("/", SPIFFS, "/index.html");
-
-    // server.begin();
-    // Serial.println(F("HTTP server started"));
-    // return true;
 }
 
 bool init_server() {
@@ -129,26 +97,6 @@ bool init_sensors() {
 }
 
 
-void get_measure(uint32_t ms, measure_stat_t& stat, measure_t& conf, measire_getter_t get) {
-    if (conf.interval && stat.initialized && (conf.interval < ms - stat.last_measure || ms < stat.last_measure)) {
-        float _value = get();
-
-        if (!isnan(_value)) {
-            if (abs(stat.current_value - _value) >= conf.delta) {
-
-            }
-
-            stat.prevois_value = stat.current_value;
-            stat.current_value = _value;
-        } else {
-            stat.error = true;
-        }
-
-        stat.last_measure = ms;
-    }
-}
-
-
 void setup() {
     Serial.begin(115200);
 
@@ -198,7 +146,6 @@ void setup() {
     //save_settings();
 }
 
-
 void loop() {
     server.handleClient();
     unsigned long ms = millis();
@@ -212,6 +159,25 @@ void loop() {
     }
 }
 
+
+void get_measure(uint32_t ms, measure_stat_t& stat, measure_t& conf, measire_getter_t get) {
+    if (conf.interval && stat.initialized && (conf.interval < ms - stat.last_measure || ms < stat.last_measure)) {
+        float _value = get();
+
+        if (!isnan(_value)) {
+            if (abs(stat.current_value - _value) >= conf.delta) {
+
+            }
+
+            stat.prevois_value = stat.current_value;
+            stat.current_value = _value;
+        } else {
+            stat.error = true;
+        }
+
+        stat.last_measure = ms;
+    }
+}
 
 float get_temperature() {
     return dht.readTemperature();
