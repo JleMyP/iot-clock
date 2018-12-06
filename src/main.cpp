@@ -129,8 +129,8 @@ void setup() {
     if (!init_server()) {
         _DEBUG_PRINTLN(F("server not started"));
     }
+    server.on(settings.api.url + "measures", HTTP_GET, api_measures_get);
 
-    
     if (settings.mdns_enabled) {
         _DEBUG_PRINTLN(F("mdns init..."));
 
@@ -157,6 +157,24 @@ void loop() {
         _DEBUG_PRINTLN(NTP.getTimeStr());
         Serial.flush();
     }
+}
+
+
+void api_measures_get() {
+    _DEBUG_PRINT(F("handling GET api/measures..."));
+
+    DynamicJsonBuffer buffer;
+    JsonObject& root = buffer.createObject();
+
+    root["temperature"] = temp_m.current_value;
+    root["humiduty"] = hum_m.current_value;
+    root["pressure"] = press_m.current_value;
+
+    String response;
+    root.printTo(response);
+    server.send(200, "application/json", response);
+
+    _DEBUG_PRINTLN(F("ok"));
 }
 
 

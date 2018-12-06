@@ -23,6 +23,8 @@ void api_settings_wifi_sta_ap_list_post();
 void api_time_get();
 void api_time_post();
 
+//void api_measures_get();
+
 void api_post_echo();
 
 #endif

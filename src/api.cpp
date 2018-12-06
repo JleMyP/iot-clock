@@ -3,6 +3,7 @@
 
 extern ESP8266WebServer server;
 extern settings_t settings;
+struct measure_stat_t;
 
 
 void init_api() {
@@ -21,6 +22,8 @@ void init_api() {
 
     server.on(settings.api.url + "time", HTTP_GET, api_time_get);
     server.on(settings.api.url + "time", HTTP_POST, api_time_post);
+
+    //server.on(settings.api.url + "measures", HTTP_GET, api_time_post);
 
     server.on(settings.api.url + "post_echo", HTTP_POST, api_post_echo);
 }
@@ -111,7 +114,7 @@ void api_settings_wifi_get() {
 }
 
 void api_settings_wifi_post() {
-    _DEBUG_PRINT(F("handling POST api/settings/wifi/sta/ap_list..."));
+    _DEBUG_PRINT(F("handling POST api/settings/wifi..."));
 
     WiFiMode mode = settings.wifi.mode;
 
@@ -137,7 +140,7 @@ void api_settings_wifi_post() {
 }
 
 void api_settings_wifi_sta_ap_list_post() {
-    _DEBUG_PRINT(F("handling POST api/settings..."));
+    _DEBUG_PRINT(F("handling POST api/wifi/sta/ap_list..."));
 
     if (server.hasArg("ssid") && server.hasArg("password")) {
         ap_t new_ap { .ssid = server.arg("ssid"), .password = server.arg("password") };

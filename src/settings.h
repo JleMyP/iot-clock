@@ -19,8 +19,8 @@
     #define _DEBUG_PRINT(...) ()
     #define _DEBUG_PRINTNL(...) ()
 #else
-    #define _DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
-    #define _DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
+    #define _DEBUG_PRINT(...) Serial.print(__VA_ARGS__); Serial.flush();
+    #define _DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__); Serial.flush();
 #endif
 
 

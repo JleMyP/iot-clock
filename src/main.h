@@ -29,7 +29,9 @@ struct measure_stat_t {
     float current_value;
     bool initialized;
     bool error;
-} temp_m, hum_m, press_m;
+};
+
+measure_stat_t temp_m, hum_m, press_m;
 
 
 DHT dht(DHTPIN, DHTTYPE);
@@ -55,5 +57,7 @@ void loop();
 float get_temperature();
 float get_humidity();
 float get_pressure();
+
+void api_measures_get();
 
 #endif // _MAIN_H_
