@@ -206,7 +206,7 @@ void api_post_echo() {
 }
 
 
-void api_type_get_get() {
+void api_type_get() {
     _DEBUG_PRINT(F("handling GET api/type..."));
 
     server.send(200, "application/json", "{\"type\": \"clock\"}");
