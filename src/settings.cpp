@@ -11,6 +11,7 @@ String settings_serialize() {
     JsonObject& root = buffer.createObject();
 
     root["name"] = settings.name;
+    root["serial"] = settings.serial;
     root["mdns_enabled"] = settings.mdns_enabled;
     root["mdns_name"] = settings.mdns_name;
 
@@ -93,6 +94,7 @@ bool settings_parse(String text, settings_t& dest) {
     }
 
     dest.name = root["name"].as<char*>();
+    dest.serial = root["serial"].as<char*>();
     dest.mdns_enabled = root["mdns_enabled"].as<bool>();
     dest.mdns_name = root["mdns_name"].as<char*>();
 

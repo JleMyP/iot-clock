@@ -27,4 +27,9 @@ void api_time_post();
 
 void api_post_echo();
 
+
+void api_type_get();
+void api_serial_get();
+void api_serial_post();
+
 #endif

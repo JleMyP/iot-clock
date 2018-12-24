@@ -40,6 +40,7 @@ struct measure_t {
 
 struct settings_t {
     String name;
+    String serial;
     String mdns_name = "clock_1";
     bool mdns_enabled = true;
 

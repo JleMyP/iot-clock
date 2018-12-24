@@ -26,6 +26,10 @@ void init_api() {
     //server.on(settings.api.url + "measures", HTTP_GET, api_time_post);
 
     server.on(settings.api.url + "post_echo", HTTP_POST, api_post_echo);
+
+    server.on(settings.api.url + "type", HTTP_GET, api_type_get);
+    server.on(settings.api.url + "serial", HTTP_GET, api_serial_get);
+    server.on(settings.api.url + "serial", HTTP_POST, api_serial_post);
 }
 
 
@@ -197,6 +201,37 @@ void api_post_echo() {
     }
 
     server.send(200, "text/plain", response);
+
+    _DEBUG_PRINTLN(F("ok"));
+}
+
+
+void api_type_get_get() {
+    _DEBUG_PRINT(F("handling GET api/type..."));
+
+    server.send(200, "application/json", "{\"type\": \"clock\"}");
+
+    _DEBUG_PRINTLN(F("ok"));
+}
+
+
+void api_serial_get() {
+    _DEBUG_PRINT(F("handling GET api/serial..."));
+
+    server.send(200, "application/json", "{\"serial\": \"" + settings.serial + "\"}");
+
+    _DEBUG_PRINTLN(F("ok"));
+}
+
+void api_serial_post() {
+    _DEBUG_PRINT(F("handling POST api/serial..."));
+
+    if (server.hasArg("serial")) {
+        settings.serial = server.arg("serial");
+        server.send(200, "ok");
+    } else {
+        server.send(400);
+    }
 
     _DEBUG_PRINTLN(F("ok"));
 }
