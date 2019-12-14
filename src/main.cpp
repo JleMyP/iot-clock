@@ -48,6 +48,7 @@ bool init_server() {
 
     server.begin(settings.api.port);
     _DEBUG_PRINTLN(F("HTTP server started"));
+    udp.begin(settings.udp_port);
     return true;
 }
 
@@ -154,8 +155,31 @@ void loop() {
         get_measure(ms, temp_m, settings.measures.temperature, get_temperature);
         get_measure(ms, hum_m, settings.measures.humiduty, get_humidity);
         get_measure(ms, press_m, settings.measures.pressure, get_pressure);
-        _DEBUG_PRINTLN(NTP.getTimeStr());
-        Serial.flush();
+        // _DEBUG_PRINTLN(NTP.getTimeStr());
+        // Serial.flush();
+    }
+
+    if (ms % 100) {
+        handle_udp();
+    }
+}
+
+
+void handle_udp() {
+    int packetSize = udp.parsePacket();
+    if (packetSize) {
+        char packet_buffer[255];
+        Serial.print("Received packet of size ");
+        Serial.println(packetSize);
+        Serial.print("From ");
+        IPAddress remoteIp = udp.remoteIP();
+        Serial.print(remoteIp);
+        int len = udp.read(packet_buffer, 255);
+        if (len > 0) {
+            packet_buffer[len] = 0;
+        }
+        Serial.println("Contents:");
+        Serial.println(packet_buffer);
     }
 }
 
@@ -163,15 +187,14 @@ void loop() {
 void api_measures_get() {
     _DEBUG_PRINT(F("handling GET api/measures..."));
 
-    DynamicJsonBuffer buffer;
-    JsonObject& root = buffer.createObject();
+    DynamicJsonDocument root(1024);
 
     root["temperature"] = temp_m.current_value;
     root["humiduty"] = hum_m.current_value;
     root["pressure"] = press_m.current_value;
 
     String response;
-    root.printTo(response);
+    serializeJson(root, response);
     server.send(200, "application/json", response);
 
     _DEBUG_PRINTLN(F("ok"));

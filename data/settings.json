@@ -3,6 +3,7 @@
     "serial": "123",
     "mdns_enabled" : true,
     "mdns_name": "clock_1",
+    "udp_port": 8080,
 
     "wifi": {
         "mode": 3,

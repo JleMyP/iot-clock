@@ -36,8 +36,7 @@ void init_api() {
 void api_system() {
     _DEBUG_PRINT(F("handling GET api/system..."));
 
-    DynamicJsonBuffer buffer;
-    JsonObject& root = buffer.createObject();
+    DynamicJsonDocument root(1024);
     root["free_heap"] = ESP.getFreeHeap();
     root["free_programm_size"] = ESP.getFreeSketchSpace();
     root["programm_md5"] = ESP.getSketchMD5();
@@ -55,7 +54,7 @@ void api_system() {
     root["reset_reason"] = ESP.getResetReason();
 
     String response;
-    root.printTo(response);
+    serializeJson(root, response);
     server.send(200, "application/json", response);
 
     _DEBUG_PRINTLN(F("ok"));

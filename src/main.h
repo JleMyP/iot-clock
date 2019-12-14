@@ -8,6 +8,7 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
+#include <WiFiUdp.h>
 #include <FS.h>
 
 #include <DHT.h>
@@ -40,6 +41,7 @@ Adafruit_BMP085 bmp;
 settings_t settings;
 String settings_filename = "/settings.json";
 
+WiFiUDP udp;
 ESP8266WebServer server;
 ESP8266HTTPUpdateServer updateServer;
 
@@ -53,6 +55,8 @@ void get_measure(uint32_t ms, measure_stat_t& stat, measure_t& conf, measire_get
 
 void setup();
 void loop();
+
+void handle_udp();
 
 float get_temperature();
 float get_humidity();
