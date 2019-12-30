@@ -11,8 +11,7 @@
 #include <WiFiUdp.h>
 #include <FS.h>
 
-#include <DHT.h>
-#include <Adafruit_BMP085.h>
+#include <Adafruit_BME280.h>
 
 #include <TimeLib.h>
 #include <NtpClientLib.h>
@@ -32,17 +31,6 @@ struct measure_stat_t {
 };
 
 measure_stat_t temp_m, hum_m, press_m;
-
-
-DHT dht(DHTPIN, DHTTYPE);
-Adafruit_BMP085 bmp;
-
-settings_t settings;
-String settings_filename = "/settings.json";
-
-WiFiUDP udp;
-ESP8266WebServer server;
-ESP8266HTTPUpdateServer updateServer;
 
 typedef float (*measire_getter_t)();
 

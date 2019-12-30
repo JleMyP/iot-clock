@@ -6,6 +6,11 @@
 #include "settings.h"
 
 
+
+extern ESP8266WebServer server;
+extern settings_t settings;
+struct measure_stat_t;
+
 void init_api();
 
 void api_system();

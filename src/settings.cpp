@@ -51,13 +51,13 @@ String settings_serialize() {
     temp_m["send_mode"] = (int)settings.measures.temperature.send_mode;
     temp_m["delta"] = settings.measures.temperature.delta;
     temp_m["packet_size"] = settings.measures.temperature.packet_size;
-    
+
     JsonObject humiduty_m = measures.createNestedObject("humiduty");
     humiduty_m["interval"] = settings.measures.humiduty.interval;
     humiduty_m["send_mode"] = (int)settings.measures.humiduty.send_mode;
     humiduty_m["delta"] = settings.measures.humiduty.delta;
     humiduty_m["packet_size"] = settings.measures.humiduty.packet_size;
-    
+
     JsonObject pressure_m = measures.createNestedObject("pressure");
     pressure_m["interval"] = settings.measures.pressure.interval;
     pressure_m["send_mode"] = (int)settings.measures.pressure.send_mode;
@@ -116,9 +116,9 @@ bool settings_parse(String text, settings_t& dest) {
     dest.time.update_interval = root["time"]["update_interval"].as<uint32_t>();
     dest.time.daylight = root["time"]["daylight"].as<bool>();
 
-    settings_read_measure(settings.measures.temperature, root["measures"]["temperature"]);
-    settings_read_measure(settings.measures.temperature, root["measures"]["temperature"]);
-    settings_read_measure(settings.measures.temperature, root["measures"]["temperature"]);
+    settings_read_measure(dest.measures.temperature, root["measures"]["temperature"]);
+    settings_read_measure(dest.measures.humiduty, root["measures"]["humiduty"]);
+    settings_read_measure(dest.measures.pressure, root["measures"]["pressure"]);
 
     dest.remote_server.address = root["remote_server"]["address"].as<char*>();
     dest.remote_server.password = root["remote_server"]["password"].as<char*>();

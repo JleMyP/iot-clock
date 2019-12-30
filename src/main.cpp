@@ -1,10 +1,25 @@
 #include "main.h"
 
+measure_stat_t temp_m, hum_m, press_m;
+
+
+Adafruit_BME280 bme;
+Adafruit_Sensor* bme_temp = bme.getTemperatureSensor();
+Adafruit_Sensor* bme_pressure = bme.getPressureSensor();
+Adafruit_Sensor* bme_humidity = bme.getHumiditySensor();
+
+settings_t settings;
+String settings_filename = "/settings.json";
+
+WiFiUDP udp;
+ESP8266WebServer server;
+ESP8266HTTPUpdateServer updateServer;
+
 
 bool init_wifi() {
     if (settings.wifi.mode == WIFI_AP || settings.wifi.mode == WIFI_AP_STA) {
         WiFi.mode(settings.wifi.mode);
-        
+
         if (!WiFi.softAP(settings.wifi.ap.ssid.c_str(), settings.wifi.ap.password.c_str(), 1, 0, 1)) {
             _DEBUG_PRINTLN(F("starting ap failed"));
         }
@@ -79,19 +94,13 @@ bool init_time() {
 }
 
 bool init_sensors() {
-    if (settings.measures.humiduty.interval || settings.measures.temperature.interval) {
-        dht.begin();
-        temp_m.initialized = true;
-        hum_m.initialized = true;
-    }
-
-    if (settings.measures.pressure.interval) {
-        press_m.initialized = bmp.begin();
-
-        if (!press_m.initialized) {
-            _DEBUG_PRINTLN(F("BMP180 KO!"));
-            return false;
-        }
+    if (settings.measures.humiduty.interval
+        || settings.measures.temperature.interval
+        || settings.measures.pressure.interval) {
+        press_m.initialized = bme.begin(BME280_ADDRESS_ALTERNATE);
+        temp_m.initialized = press_m.initialized;
+        hum_m.initialized = press_m.initialized;
+        return press_m.initialized;
     }
 
     return true;
@@ -130,6 +139,7 @@ void setup() {
     if (!init_server()) {
         _DEBUG_PRINTLN(F("server not started"));
     }
+
     server.on(settings.api.url + "measures", HTTP_GET, api_measures_get);
 
     if (settings.mdns_enabled) {
@@ -159,9 +169,11 @@ void loop() {
         // Serial.flush();
     }
 
-    if (ms % 100) {
-        handle_udp();
-    }
+    // if (ms % 100) {
+    //     handle_udp();
+    // }
+
+    delay(10);
 }
 
 
@@ -202,12 +214,13 @@ void api_measures_get() {
 
 
 void get_measure(uint32_t ms, measure_stat_t& stat, measure_t& conf, measire_getter_t get) {
-    if (conf.interval && stat.initialized && (conf.interval < ms - stat.last_measure || ms < stat.last_measure)) {
+    if (conf.interval && stat.initialized && (conf.interval < (ms - stat.last_measure)
+                                              || ms < stat.last_measure)) {
         float _value = get();
 
         if (!isnan(_value)) {
             if (abs(stat.current_value - _value) >= conf.delta) {
-
+                // TODO: эт шо
             }
 
             stat.prevois_value = stat.current_value;
@@ -221,13 +234,13 @@ void get_measure(uint32_t ms, measure_stat_t& stat, measure_t& conf, measire_get
 }
 
 float get_temperature() {
-    return dht.readTemperature();
+    return bme.readTemperature();
 }
 
 float get_humidity() {
-    return dht.readHumidity();
+    return bme.readHumidity();
 }
 
 float get_pressure() {
-    return bmp.readPressure() / 10000.0F * 75;
+    return bme.readPressure();
 }

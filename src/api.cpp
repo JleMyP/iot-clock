@@ -1,11 +1,6 @@
 #include "api.h"
 
 
-extern ESP8266WebServer server;
-extern settings_t settings;
-struct measure_stat_t;
-
-
 void init_api() {
     server.on(settings.api.url + "system", HTTP_GET, api_system);
     server.on(settings.api.url + "system/restart", HTTP_GET, api_system_restart);
@@ -182,8 +177,14 @@ void api_time_get() {
 void api_time_post() {
     _DEBUG_PRINT(F("handling POST api/time..."));
 
-    setTime(server.arg("hour").toInt(), server.arg("minute").toInt(), server.arg("second").toInt(),
-        server.arg("day").toInt(), server.arg("month").toInt(), server.arg("year").toInt());
+    setTime(
+        server.arg("hour").toInt(),
+        server.arg("minute").toInt(),
+        server.arg("second").toInt(),
+        server.arg("day").toInt(),
+        server.arg("month").toInt(),
+        server.arg("year").toInt()
+    );
     server.send(200);
 
     _DEBUG_PRINTLN(F("ok"));

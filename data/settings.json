@@ -44,13 +44,13 @@
             "packet_size": 5
         },
         "humiduty": {
-            "interval": 0,
+            "interval": 300,
             "send_mode": 1,
             "delta": 1,
             "packet_size": 5
         },
         "pressure": {
-            "interval": 0,
+            "interval": 300,
             "send_mode": 1,
             "delta": 1,
             "packet_size": 5
