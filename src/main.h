@@ -20,7 +20,6 @@
 
 
 #include "settings.h"
-#include "display.h"
 #include "api.h"
 
 
