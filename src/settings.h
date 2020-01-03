@@ -11,8 +11,6 @@
 #include <ArduinoJson.h>
 
 
-#define DHTTYPE DHT22
-#define DHTPIN D4
 #define _DEBUG
 
 #ifndef _DEBUG
@@ -21,7 +19,6 @@
 #else
     #define _DEBUG_PRINT(...) Serial.print(__VA_ARGS__); Serial.flush();
     #define _DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__); Serial.flush();
-    #define DEBUG_NTPCLIENT
 #endif
 
 
@@ -44,7 +41,6 @@ struct settings_t {
     String serial;
     String mdns_name = "clock_1";
     bool mdns_enabled = true;
-    uint32_t udp_port = 8080;
 
     struct witi_t {
         WiFiMode mode = WIFI_AP_STA;

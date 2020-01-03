@@ -11,9 +11,7 @@ Adafruit_Sensor* bme_humidity = bme.getHumiditySensor();
 settings_t settings;
 String settings_filename = "/settings.json";
 
-WiFiUDP udp;
 ESP8266WebServer server;
-ESP8266HTTPUpdateServer updateServer;
 
 
 bool init_wifi() {
@@ -57,13 +55,9 @@ bool init_wifi() {
 }
 
 bool init_server() {
-    updateServer.setup(&server);
-
     init_api();
-
     server.begin(settings.api.port);
     _DEBUG_PRINTLN(F("HTTP server started"));
-    udp.begin(settings.udp_port);
     return true;
 }
 
@@ -106,6 +100,21 @@ bool init_sensors() {
     return true;
 }
 
+bool init_mdns() {
+    if (settings.mdns_enabled) {
+        // TODO: если подключился к сетке - localIP, иначе - softAPIP
+        if (MDNS.begin(settings.mdns_name.c_str(), WiFi.localIP())) {
+            _DEBUG_PRINTLN(settings.mdns_name.c_str());
+            MDNS.enableArduino(8266);
+            MDNS.addService("http", "tcp", settings.api.port);
+        } else {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 
 void setup() {
     Serial.begin(115200);
@@ -140,87 +149,40 @@ void setup() {
         _DEBUG_PRINTLN(F("server not started"));
     }
 
-    server.on(settings.api.url + "measures", HTTP_GET, api_measures_get);
+    _DEBUG_PRINTLN(F("ota init..."));
+    ArduinoOTA.begin(false);
 
-    if (settings.mdns_enabled) {
-        _DEBUG_PRINTLN(F("mdns init..."));
-
-        if (!MDNS.begin(settings.mdns_name.c_str())) {
-            _DEBUG_PRINTLN(F("HTTP server started"));
-        } else {
-            _DEBUG_PRINTLN(settings.mdns_name.c_str());
-            MDNS.addService("http", "tcp", settings.api.port);
-        }
+    _DEBUG_PRINTLN(F("mdns init..."));
+    if (!init_mdns()) {
+        _DEBUG_PRINTLN(F("can't start mdns"));
     }
 
     Serial.flush();
-    //save_settings();
 }
 
 void loop() {
+    MDNS.update();
+    ArduinoOTA.handle();
     server.handleClient();
+
     unsigned long ms = millis();
-
-    if (ms % 10000 == 0) {
-        get_measure(ms, temp_m, settings.measures.temperature, get_temperature);
-        get_measure(ms, hum_m, settings.measures.humiduty, get_humidity);
-        get_measure(ms, press_m, settings.measures.pressure, get_pressure);
-        // _DEBUG_PRINTLN(NTP.getTimeStr());
-        // Serial.flush();
-    }
-
-    // if (ms % 100) {
-    //     handle_udp();
-    // }
+    get_measure(ms, temp_m, settings.measures.temperature, get_temperature);
+    get_measure(ms, hum_m, settings.measures.humiduty, get_humidity);
+    get_measure(ms, press_m, settings.measures.pressure, get_pressure);
 
     delay(10);
 }
 
 
-void handle_udp() {
-    int packetSize = udp.parsePacket();
-    if (packetSize) {
-        char packet_buffer[255];
-        Serial.print("Received packet of size ");
-        Serial.println(packetSize);
-        Serial.print("From ");
-        IPAddress remoteIp = udp.remoteIP();
-        Serial.print(remoteIp);
-        int len = udp.read(packet_buffer, 255);
-        if (len > 0) {
-            packet_buffer[len] = 0;
-        }
-        Serial.println("Contents:");
-        Serial.println(packet_buffer);
-    }
-}
 
-
-void api_measures_get() {
-    _DEBUG_PRINT(F("handling GET api/measures..."));
-
-    DynamicJsonDocument root(1024);
-
-    root["temperature"] = temp_m.current_value;
-    root["humiduty"] = hum_m.current_value;
-    root["pressure"] = press_m.current_value;
-
-    String response;
-    serializeJson(root, response);
-    server.send(200, "application/json", response);
-
-    _DEBUG_PRINTLN(F("ok"));
-}
-
-
-void get_measure(uint32_t ms, measure_stat_t& stat, measure_t& conf, measire_getter_t get) {
+void get_measure(uint32_t ms, measure_stat_t& stat, measure_t& conf, measure_getter_t get) {
     if (conf.interval && stat.initialized && (conf.interval < (ms - stat.last_measure)
                                               || ms < stat.last_measure)) {
         float _value = get();
 
         if (!isnan(_value)) {
             if (abs(stat.current_value - _value) >= conf.delta) {
-                // TODO: эт шо
+                // при изменении больше чем на delta - отправить сразу
             }
 
             stat.prevois_value = stat.current_value;

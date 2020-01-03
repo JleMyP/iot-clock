@@ -13,7 +13,6 @@ String settings_serialize() {
     root["serial"] = settings.serial;
     root["mdns_enabled"] = settings.mdns_enabled;
     root["mdns_name"] = settings.mdns_name;
-    root["upd_port"] = settings.udp_port;
 
     JsonObject wifi = root.createNestedObject("wifi");
     wifi["mode"] = (int)settings.wifi.mode;
@@ -98,7 +97,6 @@ bool settings_parse(String text, settings_t& dest) {
     dest.serial = root["serial"].as<char*>();
     dest.mdns_enabled = root["mdns_enabled"].as<bool>();
     dest.mdns_name = root["mdns_name"].as<char*>();
-    dest.udp_port = root["udp_port"].as<uint32_t>();
 
     dest.wifi.mode = (WiFiMode)root["wifi"]["mode"].as<uint8_t>();
     dest.wifi.ap.ssid = root["wifi"]["ap"]["ssid"].as<char*>();

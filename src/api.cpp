@@ -25,6 +25,7 @@ void init_api() {
     server.on(settings.api.url + "type", HTTP_GET, api_type_get);
     server.on(settings.api.url + "serial", HTTP_GET, api_serial_get);
     server.on(settings.api.url + "serial", HTTP_POST, api_serial_post);
+    server.on(settings.api.url + "measures", HTTP_GET, api_measures_get);
 }
 
 
@@ -232,6 +233,23 @@ void api_serial_post() {
     } else {
         server.send(400);
     }
+
+    _DEBUG_PRINTLN(F("ok"));
+}
+
+
+void api_measures_get() {
+    _DEBUG_PRINT(F("handling GET api/measures..."));
+
+    DynamicJsonDocument root(1024);
+
+    root["temperature"] = temp_m.current_value;
+    root["humiduty"] = hum_m.current_value;
+    root["pressure"] = press_m.current_value;
+
+    String response;
+    serializeJson(root, response);
+    server.send(200, "application/json", response);
 
     _DEBUG_PRINTLN(F("ok"));
 }

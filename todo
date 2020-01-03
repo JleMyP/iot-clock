@@ -5,6 +5,7 @@ WiFi Mesh
 WiFi managment
     https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266WiFi/examples/WiFiMulti/WiFiMulti.ino
     че-то там со стандартным хранением настроек во флеш в спец разделе и их восстановление при перезагрузке
+    https://github.com/tzapu/WiFiManager
 
 вермя
     работа с внешними часами и без них
@@ -21,6 +22,7 @@ WiFi managment
         есть усилок pam8403
         и i2s усилок pam8302a
 
-обнаружение
-    ответ на броадкаст
-    саморегистрация при старте
+задачки по расписанию
+    https://github.com/esp8266/Arduino/tree/master/libraries/Ticker
+    https://github.com/Makuna/Task
+    https://github.com/Toshik/TickerScheduler

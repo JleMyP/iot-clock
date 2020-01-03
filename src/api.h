@@ -9,7 +9,14 @@
 
 extern ESP8266WebServer server;
 extern settings_t settings;
-struct measure_stat_t;
+struct measure_stat_t {
+    uint64_t last_measure;
+    float prevois_value;
+    float current_value;
+    bool initialized;
+    bool error;
+};
+extern measure_stat_t temp_m, hum_m, press_m;
 
 void init_api();
 
@@ -36,5 +43,7 @@ void api_post_echo();
 void api_type_get();
 void api_serial_get();
 void api_serial_post();
+
+void api_measures_get();
 
 #endif
